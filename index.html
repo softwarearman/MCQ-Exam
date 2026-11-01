@@ -58,6 +58,45 @@ th{color:var(--mute);font-weight:600;font-size:13px}
 .empty{text-align:center;color:var(--mute);padding:26px 0}
 .ring{width:130px;height:130px;border-radius:50%;display:grid;place-items:center;flex:none}
 .ring div{width:100px;height:100px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:26px;font-weight:700}
+.g2{grid-template-columns:1.2fr 1fr}
+html,body{overflow-x:hidden}
+.q-text,.opt span,.card{overflow-wrap:anywhere}
+.opt span:last-child{min-width:0}
+@media(max-width:760px){
+  .g2{grid-template-columns:1fr}
+  .top{position:static}
+  .top .in{flex-wrap:wrap;padding:10px 12px;gap:6px}
+  .brand{flex:1 1 100%;font-size:17px;margin:0}
+  .nav{display:flex;gap:6px;width:100%}
+  .nav a{flex:1;text-align:center;padding:9px 6px;font-size:15px}
+  main{padding:14px 12px 50px}
+  h1{font-size:21px}h2{font-size:17px}
+  .card{padding:14px;border-radius:14px}
+  .stat{padding:12px}.stat b{font-size:23px}.stat span{font-size:13px}
+  .q-text{font-size:17px}
+  .opt{padding:10px 11px;gap:10px;font-size:16px}
+  .opt .l{width:28px;height:28px}
+  .layout{gap:12px}
+  .pal{grid-template-columns:repeat(7,1fr)}
+  .pal button{padding:8px 0}
+  .xbar{position:sticky;top:0;z-index:5;padding:10px 12px!important;gap:8px}
+  .xbar .timer{font-size:17px}
+  .xnav{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}
+  .xnav .btn{width:100%;padding:10px 6px}
+  .xnav .sp{margin-left:0}
+  .xnav [data-act=clear]{order:3;grid-column:1/-1}
+  .ring{width:110px;height:110px;margin:0 auto}.ring div{width:84px;height:84px;font-size:22px}
+  .rv>div{flex:1 1 100%!important;min-width:0!important}
+  .rt,.rt tbody,.rt tr,.rt td{display:block;width:100%}
+  .rt tr.hd{display:none}
+  .rt tr{border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:10px}
+  .rt td{border:0;display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+  .rt td::before{content:attr(data-label);color:var(--mute);font-size:14px}
+  .rt td:last-child{display:block;padding-top:8px}.rt td:last-child::before{content:none}
+  .rt td:last-child .btn{width:100%}
+  .filters{gap:6px}.filters button{padding:6px 11px;font-size:13px}
+  .modal .box{padding:18px}
+}
 </style>
 </head>
 <body translate="no" class="notranslate">
@@ -346,7 +385,7 @@ function pageDashboard(){
     <div class="stat"><b class="c-ok">${bn(tc)}</b><span>মোট সঠিক</span></div>
     <div class="stat"><b class="c-bad">${bn(tw)}</b><span>মোট ভুল ${ts?`• বাদ ${bn(ts)}`:''}</span></div>
   </div>
-  <div class="grid g3" style="grid-template-columns:1.2fr 1fr;margin-bottom:16px">
+  <div class="grid g2" style="margin-bottom:16px">
     <div class="card" style="margin:0"><h2>বিষয়ভিত্তিক ফলাফল</h2>${n?sh:'<div class="empty">পরীক্ষা দিলে এখানে বিষয়ভিত্তিক ফলাফল দেখা যাবে।</div>'}</div>
     <div class="card" style="margin:0"><h2>প্রশ্নব্যাংক</h2>
       <p style="margin:0 0 8px;color:var(--mute)">মোট প্রশ্ন <b style="color:var(--ink)">${bn(QB.length)}</b> • দেখা হয়েছে <b style="color:var(--ink)">${bn(seenU)}</b></p>
@@ -358,9 +397,9 @@ function pageDashboard(){
 }
 function historyTable(list){
   if(!list.length)return '<div class="empty">এখনও কোনো পরীক্ষা দেওয়া হয়নি।</div>';
-  return `<div style="overflow-x:auto"><table><tr><th>#</th><th>তারিখ</th><th>স্কোর</th><th>সঠিক</th><th>ভুল</th><th>বাদ</th><th>সময়</th><th></th></tr>`+
-  list.map(r=>`<tr><td>${bn(r.no)}</td><td>${fmtDate(r.date)}</td><td><b>${bn(r.correct)}/${bn(r.ids.length)}</b> <span style="color:var(--mute)">(${bn(pct(r.correct,r.ids.length))}%)</span></td>
-  <td class="c-ok">${bn(r.correct)}</td><td class="c-bad">${bn(r.wrong)}</td><td class="c-sk">${bn(r.skip)}</td><td>${fmtDur(r.time)}</td>
+  return `<div><table class="rt"><tr class="hd"><th>#</th><th>তারিখ</th><th>স্কোর</th><th>সঠিক</th><th>ভুল</th><th>বাদ</th><th>সময়</th><th></th></tr>`+
+  list.map(r=>`<tr><td data-label="পরীক্ষা">#${bn(r.no)}</td><td data-label="তারিখ">${fmtDate(r.date)}</td><td data-label="স্কোর"><span><b>${bn(r.correct)}/${bn(r.ids.length)}</b> <span style="color:var(--mute)">(${bn(pct(r.correct,r.ids.length))}%)</span></span></td>
+  <td class="c-ok" data-label="সঠিক">${bn(r.correct)}</td><td class="c-bad" data-label="ভুল">${bn(r.wrong)}</td><td class="c-sk" data-label="বাদ">${bn(r.skip)}</td><td data-label="সময়">${fmtDur(r.time)}</td>
   <td><button class="btn sm" data-go="#/review/${r.id}">View</button></td></tr>`).join('')+`</table></div>`;
 }
 
@@ -405,7 +444,7 @@ function renderExamBody(){
     pal+='</div>';off+=cnt;
   });
   $('#app').innerHTML=`
-  <div class="card row" style="position:sticky;top:62px;z-index:5">
+  <div class="card row xbar" style="position:sticky;top:0;z-index:5">
     <div>উত্তর দেওয়া: <b>${bn(answered)}/${bn(c.ids.length)}</b></div>
     <div class="timer sp" id="timer">--:--</div>
     <button class="btn red sm" data-act="submit">জমা দিন</button>
@@ -415,7 +454,7 @@ function renderExamBody(){
       <div class="row"><span class="tag ${SUBJ[q.s].c}">${SUBJ[q.s].n}</span><span style="color:var(--mute)">প্রশ্ন ${bn(c.idx+1)} / ${bn(c.ids.length)}</span></div>
       <div class="q-text">${esc(q.q)}</div>
       ${q.o.map((t,i)=>`<button class="opt ${sel===i?'sel':''}" data-opt="${i}"><span class="l">${LET[i]}</span><span>${esc(t)}</span></button>`).join('')}
-      <div class="row" style="margin-top:14px">
+      <div class="row xnav" style="margin-top:14px">
         <button class="btn ghost" data-act="prev" ${c.idx===0?'disabled':''}>← আগের</button>
         <button class="btn ghost" data-act="clear" ${sel==null?'disabled':''}>উত্তর মুছুন</button>
         <button class="btn sp" data-act="next" ${c.idx===c.ids.length-1?'disabled':''}>পরের →</button>
@@ -451,7 +490,7 @@ function pageReview(id){
   const fb=(k,t)=>`<button class="${rf===k?'on':''}" data-f="${k}">${t}</button>`;
   $('#app').innerHTML=`
   <div class="row" style="margin-bottom:6px"><h1 style="margin:0">পরীক্ষা #${bn(r.no)} — ফলাফল</h1><button class="btn ghost sm sp" data-go="#/dashboard">← Dashboard</button></div>
-  <div class="card row" style="gap:22px">
+  <div class="card row rv" style="gap:22px">
     <div class="ring" style="background:conic-gradient(${col} ${p*3.6}deg,#e8ecf7 0)"><div>${bn(p)}%</div></div>
     <div style="flex:1;min-width:230px">
       <div style="font-size:26px;font-weight:700">${bn(r.correct)} / ${bn(total)}</div>
