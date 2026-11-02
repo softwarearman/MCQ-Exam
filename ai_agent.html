@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#3b5bdb">
+    <title>PyScript AI Agent - MCQ Assistant</title>
+
+    <!-- PyScript CSS & JS CDN -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #f3f5fb;
+            --card: #ffffff;
+            --ink: #1c2340;
+            --mute: #65708f;
+            --line: #e2e6f2;
+            --pri: #3b5bdb;
+            --pri2: #2b46b5;
+            --okbg: #e6f7ee;
+            --userbg: #e3e9ff;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        html, body { height: 100%; margin: 0; }
+
+        body {
+            font-family: 'Hind Siliguri', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            overflow: hidden;           /* পেজ নয়, শুধু মেসেজ এরিয়া স্ক্রল হবে */
+        }
+
+        /* ===== পুরো স্ক্রিন জুড়ে চ্যাট (মোবাইল) ===== */
+        .chat-box {
+            width: 100%;
+            max-width: 720px;
+            height: 100vh;
+            height: 100dvh;             /* কীবোর্ড/অ্যাড্রেস বার হিসাব করে */
+            display: flex;
+            flex-direction: column;
+            background: var(--card);
+        }
+
+        .chat-header {
+            flex: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+            background: var(--pri);
+            color: #fff;
+        }
+        .chat-header h2 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.2;
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chat-header small { font-weight: 400; opacity: .85; font-size: 12px; }
+
+        .messages {
+            flex: 1 1 auto;
+            min-height: 0;              /* flex এ স্ক্রল চালু রাখার জন্য জরুরি */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            padding: 12px 10px;
+            background: #fafbfe;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg {
+            max-width: 94%;
+            padding: 9px 12px;
+            border-radius: 14px;
+            font-size: 15px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+        .user {
+            background: var(--userbg);
+            align-self: flex-end;
+            border-bottom-right-radius: 3px;
+        }
+        .agent {
+            background: var(--okbg);
+            align-self: flex-start;
+            border-bottom-left-radius: 3px;
+            border: 1px solid #c3edd5;
+            color: #0d5c2e;
+            width: 94%;                 /* কার্ড পুরো চওড়া নিতে পারে */
+        }
+
+        /* ===== প্রশ্ন কার্ড ===== */
+        .qcard { background:#fff; border:1px solid #c3edd5; border-radius:12px; padding:10px; margin:8px 0; color: var(--ink); }
+        .qtag  { font-size:12px; font-weight:600; color:var(--pri2); margin-bottom:4px; }
+        .qtext { font-weight:600; margin-bottom:8px; font-size:15px; }
+        .qopt  { padding:7px 10px; border-radius:8px; font-size:14px; margin-bottom:4px; background:#f6f7fc; }
+        .qopt.ok { background:var(--okbg); color:#0d5c2e; font-weight:600; }
+        .qpick { cursor:pointer; border:1.5px solid var(--line); background:#fff; min-height:42px; display:flex; align-items:center; gap:6px; }
+        .qpick:active { background:#eef1ff; border-color:var(--pri); }
+        .qans  { margin-top:6px; font-size:14px; color:#0d5c2e; }
+        .qexp  { margin-top:6px; background:#f1f4fb; border-left:4px solid var(--pri); padding:6px 10px; border-radius:6px; font-size:13.5px; color: var(--ink); }
+        .more  { margin-top:8px; font-size:13px; color:var(--mute); }
+        small  { color: var(--mute); }
+        code   { background:#eef1ff; padding:1px 5px; border-radius:4px; font-size:13px; }
+
+        /* ===== ট্যাপ বাটন (chips) ===== */
+        .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+        .chip {
+            padding: 7px 12px;
+            font-size: 13.5px;
+            font-weight: 600;
+            background: #fff;
+            color: var(--pri2);
+            border: 1.5px solid var(--pri);
+            border-radius: 999px;
+            cursor: pointer;
+        }
+        .chip:active { background: var(--pri); color: #fff; }
+
+        .quick {
+            flex: none;
+            display: flex;
+            gap: 6px;
+            padding: 8px 10px 0;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+            border-top: 1px solid var(--line);
+            background: #fff;
+        }
+        .quick::-webkit-scrollbar { display: none; }
+        .quick .chip { flex: none; }
+
+        /* ===== ইনপুট (নিচে আটকানো) ===== */
+        .input-group {
+            flex: none;
+            display: flex;
+            gap: 8px;
+            padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+            background: #fff;
+        }
+        input {
+            flex: 1;
+            min-width: 0;
+            padding: 11px 14px;
+            border: 1.5px solid var(--line);
+            border-radius: 999px;
+            font-size: 16px;            /* iOS এ জুম হওয়া আটকায় */
+            font-family: inherit;
+            outline: none;
+            background: #f7f8fd;
+        }
+        input:focus { border-color: var(--pri); background: #fff; }
+
+        #sendBtn {
+            flex: none;
+            padding: 0 20px;
+            min-height: 44px;
+            background: var(--pri);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        #sendBtn:active { background: var(--pri2); }
+
+        .messages::-webkit-scrollbar { width: 5px; }
+        .messages::-webkit-scrollbar-thumb { background: #d0d5e5; border-radius: 10px; }
+
+        /* ===== ডেস্কটপ/ট্যাবলেটে সুন্দর বক্স ===== */
+        @media (min-width: 720px) {
+            body { align-items: center; padding: 16px; }
+            .chat-box {
+                height: min(92vh, 820px);
+                border-radius: 18px;
+                overflow: hidden;
+                box-shadow: 0 8px 24px rgba(0,0,0,.10);
+                border: 1px solid var(--line);
+            }
+        }
+
+        /* ছোট ফোন */
+        @media (max-width: 380px) {
+            .msg { font-size: 14px; }
+            .chat-header h2 { font-size: 15px; }
+            .qpick { font-size: 13.5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-box">
+        <div class="chat-header">
+            <h2>🤖 AI Agent <small>· MCQ Helper</small></h2>
+        </div>
+
+        <div class="messages" id="chatMessages">
+            <div class="msg agent">
+                <b>AI Agent:</b> স্বাগতম! ঢাবি খ-ইউনিটের প্রশ্ন ও উত্তরের জন্য যেকোনো প্রশ্ন বা কিউয়ার্ড লিখে মেসেজ পাঠান। বানান ভুল হলেও সমস্যা নেই!
+            </div>
+        </div>
+
+        <!-- দ্রুত বাটন: ট্যাপ করলেই মেসেজ চলে যাবে -->
+        <div class="quick">
+            <button type="button" class="chip" data-send="কুইজ">🎯 কুইজ</button>
+            <button type="button" class="chip" data-send="বাংলা কুইজ">বাংলা</button>
+            <button type="button" class="chip" data-send="English quiz">English</button>
+            <button type="button" class="chip" data-send="জিকে কুইজ">সাধারণ জ্ঞান</button>
+            <button type="button" class="chip" data-send="আরো">📄 আরো</button>
+            <button type="button" class="chip" data-send="help">❓ help</button>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="userInput" placeholder="প্রশ্ন লিখুন........" autocomplete="off" enterkeyhint="send">
+            <button id="sendBtn" type="button">Send</button>
+        </div>
+    </div>
+
+    <!-- agent.py এবং index.html একই ফোল্ডারে থাকতে হবে -->
+    <py-script src="agent.py"></py-script>
+
+</body>
+</html>
