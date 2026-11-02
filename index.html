@@ -18,6 +18,16 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'Hind Siliguri',
 .nav a{display:inline-block;padding:8px 16px;border-radius:10px;color:var(--mute);text-decoration:none;font-weight:600}
 .nav a.on{background:var(--pri);color:#fff}
 .nav a:not(.on):hover{background:#eef1fb}
+
+/* Agent Dropdown Style */
+.dropdown {position: relative; display: inline-block;}
+.dropdown-btn {display: inline-block; padding: 8px 16px; border-radius: 10px; color: var(--mute); text-decoration: none; font-weight: 600; background: none; border: none; font-family: inherit; font-size: inherit; cursor: pointer;}
+.dropdown-btn:hover {background: #eef1fb;}
+.dropdown-content {display: none; position: absolute; background-color: #fff; min-width: 140px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1); border-radius: 10px; border: 1px solid var(--line); z-index: 20; top: 100%; left: 0;}
+.dropdown-content a {color: var(--ink); padding: 8px 14px; text-decoration: none; display: block; border-radius: 8px; font-weight: 500;}
+.dropdown-content a:hover {background-color: #eef1fb; color: var(--pri);}
+.dropdown.show .dropdown-content {display: block;}
+
 main{max-width:1040px;margin:auto;padding:20px 16px 60px}
 h1{font-size:24px;margin:4px 0 16px}h2{font-size:19px;margin:0 0 12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
@@ -46,7 +56,7 @@ th{color:var(--mute);font-weight:600;font-size:13px}
 .layout{display:grid;grid-template-columns:1fr 280px;gap:16px;align-items:start}
 @media(max-width:860px){.layout{grid-template-columns:1fr}}
 .pal{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
-.pal button{border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:6px 0;font:inherit;font-size:14px;cursor:pointer}
+.pal button{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:6px 0;font:inherit;font-size:14px;cursor:pointer}
 .pal button.done{background:#dfe6ff;border-color:#9fb1f5}.pal button.cur{outline:2.5px solid var(--pri);outline-offset:1px}
 .pal-h{font-weight:600;font-size:14px;margin:12px 0 6px}
 .timer{font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}.timer.low{color:var(--bad)}
@@ -69,7 +79,7 @@ html,body{overflow-x:hidden}
   .top .in{flex-wrap:wrap;padding:10px 12px;gap:6px}
   .brand{flex:1 1 100%;font-size:17px;margin:0}
   .nav{display:flex;gap:6px;width:100%}
-  .nav a{flex:1;text-align:center;padding:9px 6px;font-size:15px}
+  .nav a, .nav .dropdown-btn{flex:1;text-align:center;padding:9px 6px;font-size:15px}
   main{padding:14px 12px 50px}
   h1{font-size:21px}h2{font-size:17px}
   .card{padding:14px;border-radius:14px}
@@ -97,8 +107,10 @@ html,body{overflow-x:hidden}
   .rt td:last-child .btn{width:100%}
   .filters{gap:6px}.filters button{padding:6px 11px;font-size:13px}
   .modal .box{padding:18px}
+
 }
 </style>
+
 </head>
 <h1 style="color: orangered;">Welcome, Sultana Queen Of Arman</h1>
 <body translate="no" class="notranslate">
@@ -108,12 +120,34 @@ html,body{overflow-x:hidden}
     <a href="#/dashboard" data-r="dashboard">Dashboard</a>
     <a href="#/exam" data-r="exam">Exam</a>
     <a href="#/history" data-r="history">ফলাফল</a>
+    <div class="dropdown" id="agentDropdown">
+      <button class="dropdown-btn" id="agentBtn">Agent ▾</button>
+      <div class="dropdown-content">
+        <a href="ai_agent.html" target="_blank">AI Agent</a>
+        <a href="human-agent.html" target="_blank">Human Agent</a>
+      </div>
+    </div>
   </nav>
 </div></header>
 <main id="app"></main>
 <div id="modal"></div>
 
 <script>
+/* Agent Dropdown Click Event */
+const agentDropdown = document.getElementById('agentDropdown');
+const agentBtn = document.getElementById('agentBtn');
+
+agentBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  agentDropdown.classList.toggle('show');
+});
+
+document.addEventListener('click', (e) => {
+  if (!agentDropdown.contains(e.target)) {
+    agentDropdown.classList.remove('show');
+  }
+});
+
 /* ================= প্রশ্নব্যাংক (৩টি PDF) ================= */
 /* ফরম্যাট: [প্রশ্ন, [A,B,C,D], সঠিক উত্তরের index (0=A), ব্যাখ্যা(ঐচ্ছিক)] */
 const BANK={
@@ -124,7 +158,7 @@ bn:[
 ["'আত্মাকে চিনলেই আত্মনির্ভরতা আসে' উদ্ধৃতিটি যে রচনার অন্তর্গত—",["অপরিচিতা","বিড়াল","আহ্বান","আমার পথ"],3,"'আমার পথ' কাজী নজরুল ইসলামের প্রবন্ধগ্রন্থ 'রুদ্র-মঙ্গল' থেকে সংকলিত।"],
 ["'ও কি ঘরে বালা আনবার চায় না কি? চায় না কি আমার সংসার উচ্ছন্নে যাক, মড়ক লাগুক ঘরে' উক্তিটি করেছিল—",["খালেক ব্যাপারী","মজিদ","রহিমা","জমিলা"],1,"সৈয়দ ওয়ালীউল্লাহ্‌র 'লালসালু' উপন্যাসে মজিদ দ্বিতীয় স্ত্রী জমিলার আচরণে বিরক্ত হয়ে রহিমাকে শুনিয়ে কথাটি বলে।"],
 ["ইতিহাসের একজন সামন্ত নবাব হয়েও সিরাজউদ্দৌলা নাটকে সিরাজ চরিত্রটি হয়ে উঠেছে—",["দেশপ্রেমিক নেতা","ষড়যন্ত্র-জাল ছিন্নকারী","লড়াকু বীর","জনদরদি"],0],
-["'কুহেলী উত্তরী তলে —— সন্ন্যাসী' উদ্ধৃতির শূন্যস্থানে বসবে—",["মাঘের","পৌষের","শীতের","ফাল্গুনের"],0,"সুফিয়া কামালের 'তাহারেই পড়ে মনে' কবিতা থেকে।"],
+["'কুহেলী উত্তরী তলে —— সন্ন্যাসী' উদ্ধৃতির শূন্যস্থানে বসবে—",["মাঘের","পৌষের","শীতের","ফাল্গুনের"],0,"সুফিয়া কামালের 'তাহারে পড়ে মনে' কবিতা থেকে।"],
 ["'নয়নকমল' এর যথার্থ ব্যাসবাক্য হলো—",["নয়নের ন্যায় কমল","নয়ন কমলের ন্যায়","নয়নে কমল","নয়ন ও কমল"],1,"উপমান কর্মধারয় সমাস।"],
 ["'লোক-লোকান্তর' কবিতায় চেতনার তুল্য রূপ হলো—",["কৃষ্ণচূড়া","পাখি","নক্ষত্র","সবুজ অরণ্য"],1],
 ["'উত্তম' শব্দের সমার্থক নয়—",["উপাদেয়","উৎকৃষ্ট","অভিরুচি","বরেণ্য"],2],
@@ -158,7 +192,7 @@ gk:[
 ["জলবায়ুর উপাদান নয়—",["মেঘ","সমুদ্রস্রোত","বায়ু","আর্দ্রতা"],1],
 ["SDG-এর পূর্ণরূপ হলো—",["Successive Developmental Goals","Successful Development Goals","Substantial Developmental Goals","Sustainable Development Goals"],3],
 ["'রিফিউজি' সমস্যাটি যে সংস্থার সঙ্গে সম্পর্কিত—",["ইউএনডিপি","ইউএনএফপিএ","ইউএনএইচসিআর","আইইউসিএন"],2],
-["বাঙালি জাতীয়তাবাদের মূলভিত্তি হলো—",["আঞ্চলিকতা","ধর্ম","রাজনীতি","ভাষা ও সংস্কৃতি"],3],
+["বাঙালি জাতীয়তাবাদের মূলভিত্তি হলো—",["আঞ্চলিতা","ধর্ম","রাজনীতি","ভাষা ও সংস্কৃতি"],3],
 ["গ্রিনল্যান্ড যে দেশের অংশ—",["যুক্তরাষ্ট্র","ডেনমার্ক","রাশিয়া","নরওয়ে"],1],
 ["বাংলাদেশের সংবিধান প্রণয়ন কমিটির একমাত্র নারী সদস্য—",["আনোয়ারা বেগম","সুফিয়া কামাল","সৈয়দা সাজেদা চৌধুরী","ইউ.এ.বি. রাজিয়া আক্তার বানু"],3],
 ["বাংলাদেশের ক্ষুদ্র জাতিসত্তা সিলেটে বাস করে না—",["খাসিয়া","পাত্র","মণিপুরি","তঞ্চঙ্গ্যা"],3],
